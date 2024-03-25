@@ -65,9 +65,8 @@ public:
 	void handleMouseWheel(int x, int y, int direction) override;
 	void handleCommand(CommandSender *sender, uint32 cmd, uint32 data) override;
 
+	int findNextItemIndex(int oldSel);
 	void setGroupsVisibility(bool val) { _groupsVisible = val; }
-	int getTopElementIndex() const { return _listIndex[0]; }
-
 	void startEditMode() override { error("Edit mode is not supported for Grouped Lists"); }
 
 protected:

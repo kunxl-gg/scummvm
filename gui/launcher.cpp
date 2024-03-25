@@ -60,6 +60,7 @@
 #endif
 #if defined(USE_DLC)
 #include "backends/dlc/dlcmanager.h"
+#include "launcher.h"
 #endif
 
 namespace GUI {
@@ -449,6 +450,10 @@ void LauncherDialog::removeGame(int item) {
 	MessageDialog alert(_("Do you really want to remove this game configuration?"), _("Yes"), _("No"));
 
 	if (alert.runModal() == GUI::kMessageOK) {
+		int newSel = -1;
+		if(_groupBy != kGroupByNone) {
+			newSel = findNextItem(item);
+		}
 		// Remove the currently selected game from the list
 		assert(item >= 0);
 		ConfMan.removeGameDomain(_domains[item]);
@@ -457,7 +462,7 @@ void LauncherDialog::removeGame(int item) {
 		ConfMan.flushToDisk();
 
 		// Update the ListWidget/GridWidget and force a redraw
-		updateListing();
+		updateListing(newSel);
 		g_gui.scheduleTopDialogRedraw();
 	}
 }
@@ -981,7 +986,8 @@ public:
 	LauncherDisplayType getType() const override { return kLauncherDisplayList; }
 
 protected:
-	void updateListing() override;
+	int findNextItem(int oldSel) override;
+	void updateListing(int selectionIndex = -1) override;
 	void groupEntries(const Common::Array<LauncherEntry> &metadata);
 	void updateButtons() override;
 	void selectTarget(const Common::String &target) override;
@@ -1003,7 +1009,8 @@ public:
 	LauncherDisplayType getType() const override { return kLauncherDisplayGrid; }
 
 protected:
-	void updateListing() override;
+	int findNextItem(int oldSel) override;
+	void updateListing(int selectIndex = -1) override;
 	void groupEntries(const Common::Array<LauncherEntry> &metadata);
 	void updateButtons() override;
 	void selectTarget(const Common::String &target) override;
@@ -1117,7 +1124,12 @@ void LauncherSimple::build() {
 	updateButtons();
 }
 
-void LauncherSimple::updateListing() {
+int LauncherSimple::findNextItem(int oldSel) {
+	int newSel = _list->findNextItemIndex(oldSel);
+	return newSel;
+}
+
+void LauncherSimple::updateListing(int selectionIndex) {
 	Common::U32StringArray l;
 	ThemeEngine::FontColor color;
 	int numEntries = ConfMan.getInt("gui_list_max_scan_entries");
@@ -1156,9 +1168,8 @@ void LauncherSimple::updateListing() {
 
 	groupEntries(domainList);
 
-	if (_groupBy != kGroupByNone) {
-		int selectedIndex = -1 *(_list->getTopElementIndex() + 2);
-		_list->setSelected(selectedIndex);
+	if (_groupBy != kGroupByNone && selectionIndex != -1) {
+		_list->setSelected(selectionIndex);
 	} else if (oldSel < (int)l.size() && oldSel >= 0)
 		_list->setSelected(oldSel);	// Restore the old selection
 	else if (oldSel != -1)
@@ -1556,7 +1567,11 @@ void LauncherGrid::handleCommand(CommandSender *sender, uint32 cmd, uint32 data)
 	}
 }
 
-void LauncherGrid::updateListing() {
+int LauncherGrid::findNextItem(int oldSel) {
+	return 0;
+}
+
+void LauncherGrid::updateListing(int selectionIndex) {
 	// Retrieve a list of all games defined in the config file
 	_domains.clear();
 	const Common::ConfigManager::DomainMap &domains = ConfMan.getGameDomains();

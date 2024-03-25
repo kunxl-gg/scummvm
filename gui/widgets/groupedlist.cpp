@@ -294,6 +294,28 @@ void GroupedListWidget::handleCommand(CommandSender *sender, uint32 cmd, uint32 
 	}
 }
 
+int GroupedListWidget::findNextItemIndex(int oldSel) {
+	bool foundOldSel = false;
+	int previousItem = -1;
+
+	// Find the next item in the list
+	for (int i = 0; i < _listIndex.size(); i++) {
+		if (foundOldSel && _listIndex[i] >= 0) {
+			return _listIndex[i];
+		} else if (_listIndex[i] == oldSel && i == _listIndex.size() - 1) {
+			return previousItem;
+		} else if (_listIndex[i] == oldSel) {
+			foundOldSel = true;
+		}
+
+		// Storing the previous item in case the oldSel is the last item in the list
+		if (_listIndex[i] >= 0) {
+			previousItem = _listIndex[i];
+		}
+	}
+	return -1;
+}
+
 void GroupedListWidget::toggleGroup(int groupID) {
 	_groupExpanded[groupID] = !_groupExpanded[groupID];
 	sortGroups();
