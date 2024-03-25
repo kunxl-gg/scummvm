@@ -1156,7 +1156,10 @@ void LauncherSimple::updateListing() {
 
 	groupEntries(domainList);
 
-	if (oldSel < (int)l.size() && oldSel >= 0)
+	if (_groupBy != kGroupByNone) {
+		int selectedIndex = -1 *(_list->getTopElementIndex() + 2);
+		_list->setSelected(selectedIndex);
+	} else if (oldSel < (int)l.size() && oldSel >= 0)
 		_list->setSelected(oldSel);	// Restore the old selection
 	else if (oldSel != -1)
 		// Select the last entry if the list has been reduced
