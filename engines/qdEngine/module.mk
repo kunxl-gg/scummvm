@@ -4,7 +4,8 @@ MODULE_OBJS = \
 	qdengine.o \
 	console.o \
 	metaengine.o \
-	detection.o
+	detection.o \
+	core/qd_precomp.o
 
 # This module can be built as a plugin
 ifeq ($(ENABLE_QDENGINE), DYNAMIC_PLUGIN)
